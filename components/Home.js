@@ -17,45 +17,45 @@ const Home = () => {
         return (
             <View style={styles.section}>
                 <Text>
-                    Section {section}
+                    Section {state.hwSections[section].route_id}
                 </Text>
             </View>
         );
     };
 
-    const _renderIndexPath = ({ section: section, row: row }) => {
+    const _renderIndexPath = ({ section, row }) => {
+        const item = state.hwSections[section].items[row];
         return (
-            <View style={styles.row}>
-                <Text>
-                    Section {section} Row {row}
-                </Text>
-                <View style={styles.line} />
+            <View>
+                <Button onPress={() => 
+                    dispatch({ type: 'set-current-component', payload: 'Filter' })
+                } title="Filter" />
+                <TouchableOpacity
+                    onPress={() => {
+                        dispatch({ type: 'set-current-hw', payload: item });
+                        dispatch({ type: 'set-current-component', payload: 'Detail' });
+                    }}>
+                    <View style={styles.row}>
+                        <Text>
+                            {JSON.stringify(state.hwSections[section].items[row])}
+                        </Text>
+                        <View style={styles.line} />
+                    </View>
+                </TouchableOpacity>
             </View>
         );
     };
-
-    const _sectionCount = 10;
-    const _rowCount = 10;
-
 
     const data = [];
-    for (let section = 0; section < _sectionCount; ++section) {
+    for (let section = 0; section < state.hwSections.length; ++section) {
         const sContent = { items: [] };
-        for (let row = 0; row < _rowCount; ++row) {
+        for (let row = 0; row < state.hwSections[section].items.length; ++row) {
             sContent.items.push(row);
         }
         data.push(sContent);
     }
 
-
     return (<View>
-        <Text>{state.count}</Text>
-
-        <Button onPress={() => dispatch({ type: 'increment' })} title="+" />
-        <Button onPress={() => dispatch({ type: 'decrement' })} title="-" />
-
-        <Button onPress={actions.fetchHandwork} title="handwork" />
-        <Button onPress={actions.fetchUnusal} title="unusal" />
         <LargeList
             style={styles.container}
             data={data}
