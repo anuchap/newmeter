@@ -4,7 +4,7 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import { LargeList } from "react-native-largelist-v3";
 
 const Home = () => {
-    const { state, dispatch, actions } = React.useContext(GlobalContext);
+    const { state, actions } = React.useContext(GlobalContext);
 
     React.useEffect(() => {
         actions.fetchUnusal();
@@ -28,12 +28,12 @@ const Home = () => {
         return (
             <View>
                 <Button onPress={() => 
-                    dispatch({ type: 'set-current-component', payload: 'Filter' })
+                    actions.setCurrentView('Filter')
                 } title="Filter" />
                 <TouchableOpacity
                     onPress={() => {
-                        dispatch({ type: 'set-current-hw', payload: item });
-                        dispatch({ type: 'set-current-component', payload: 'Detail' });
+                        actions.setCurrentItem(item);
+                        actions.setCurrentView('Detail');
                     }}>
                     <View style={styles.row}>
                         <Text>

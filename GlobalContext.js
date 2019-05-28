@@ -1,30 +1,28 @@
 import * as React from 'react';
 import SQLiteProvider from './providers/SQLiteProvider';
 
+const FETCH_HANDWORK = 'FETCH_HANDWORK';
+const FETCH_UNUSAL = 'FETCH_UNUSAL';
+const SET_CUR_ITEM =  'SET_CUR_ITEM';
+const SET_CUR_VIEW = 'SET_CUR_VIEW';
+
 var SQLiteObj = SQLiteProvider.getInstance();
 
 let GlobalContext = React.createContext();
 
 let initialState = {
-    count: 10,
-    currentComponent: 'Home',
     handworks: [],
     unusals: [],
-    hwSections: [],
-    currentHw: null
+    sections: [],
+    currentItem: null,
+    currentView: 'Home'
 };
 
 let reducer = (state, action) => {
     switch (action.type) {
-        case 'reset':
-            return initialState;
-        case 'increment':
-            return { ...state, count: state.count + 1 };
-        case 'decrement':
-            return { ...state, count: state.count - 1 };
-        case 'set-current-component':
-            return { ...state, currentComponent: action.payload }
-        case 'fetch-handwork':
+        case SET_CUR_VIEW:
+            return { ...state, currentView: action.payload }
+        case FETCH_HANDWORK:
             let sections = action.payload.reduce((re, o) => {
                 let existObj = re.find(obj => obj.title === o.route_id);  
                 if (existObj) {
@@ -34,11 +32,11 @@ let reducer = (state, action) => {
                 }
                 return re;
             }, []);   
-            return { ...state, handworks: action.payload, handworkSections: sections, currentHw: action.payload[0] };
-        case 'fetch-unusal':
+            return { ...state, handworks: action.payload, sections: sections, currentItem: action.payload[0] };
+        case FETCH_UNUSAL:
             return { ...state, unusals: action.payload };
-        case 'set-current-hw':
-            return { ...state, currentHw: action.payload };
+        case SET_CUR_ITEM:
+            return { ...state, currentItem: action.payload };
         default:
             return state;
     }
@@ -58,7 +56,7 @@ function GlobalContextProvider(props) {
                     rows.push(row);
                 }
                 dispatch({
-                    type: 'fetch-handwork',
+                    type: FETCH_HANDWORK,
                     payload: rows
                 });
             });
@@ -75,7 +73,7 @@ function GlobalContextProvider(props) {
                     rows.push(row);
                 }
                 dispatch({
-                    type: 'fetch-unusal',
+                    type: FETCH_UNUSAL,
                     payload: rows
                 });
             });
@@ -83,7 +81,6 @@ function GlobalContextProvider(props) {
     };
 
     const applyFilter = ({ route_id, read_order, meter_id, account_no, old_account, order_by }) => {
-
         let q = `select * from handwork 
                 where meter_id like '%${meter_id.trim()}%' 
                 and account_no like '%${account_no.trim()}%' 
@@ -101,15 +98,18 @@ function GlobalContextProvider(props) {
                     rows.push(row);
                 }
                 dispatch({
-                    type: 'fetch-handwork',
+                    type: FETCH_HANDWORK,
                     payload: rows
                 });
             });
         });
     };
 
-    let actions = { fetchHandwork, fetchUnusal };
-    let value = { state, dispatch, actions };
+    const setCurrentView = (view) => dispatch({ type: SET_CUR_VIEW, payload: view });
+    const setCurrentIItem = (item) => dispatch({ type: SET_CUR_ITEM, payload: item });
+
+    let actions = { fetchHandwork, fetchUnusal, applyFilter, setCurrentView, setCurrentIItem };
+    let value = { state, actions };
     
     return (
         <GlobalContext.Provider value={value}>{props.children}</GlobalContext.Provider>
